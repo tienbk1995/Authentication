@@ -33,13 +33,6 @@ function showOutput(res) {
   `;
 }
 
-// const reqHeaders = {
-//   "Content-Type": "application/json",
-//   Authorization: getStoredAuthToken()
-//     ? `Bearer ${getStoredAuthToken()}`
-//     : undefined,
-// };
-
 let reqHeaders = {
   "Content-Type": "application/json",
   Authorization: String,
@@ -122,22 +115,6 @@ async function submitEventHandler(e) {
   console.log(reqHeaders);
   showOutput(res);
 }
-
-function resolveAfter2Seconds() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve("resolved");
-    }, 2000);
-  });
-}
-
-// document.getElementById("myForm").addEventListener("submit", async (e) => {
-//   e.preventDefault();
-//   console.log("calling");
-//   const result = resolveAfter2Seconds();
-//   console.log(result);
-//   // expected output: "resolved"
-// });
 
 document
   .getElementById("myForm")

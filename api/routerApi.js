@@ -9,22 +9,55 @@ const jwt = require("jsonwebtoken");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-// mongoApi.createUser(
-//   "TienPhan",
-//   "123456",
-//   (err, user) => {
-//     if (err) {
-//       console.error(err);
-//     }
-//     if (user) {
-//       console.log(user);
-//     }
-//   },
-//   userModel
-// );
-// router.post("/login", (req, res, next) => {
-//   res.json("hello");
+// router.post("/signup/create", (req, res, next) => {
+//   mongoApi.createUser(
+//     req.body.user,
+//     req.body.pass,
+//     (err, user) => {
+//       if (err) {
+//         console.error(err);
+//         return next(err);
+//       }
+//       if (user) {
+//         console.log(user);
+//         res.status(200).send(user);
+//       }
+//     },
+//     userModel
+//   );
 // });
+
+router.post("/signup/create", (req, res, next) => {
+  mongoApi.findOne(
+    req.body.user,
+    (err, user) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        mongoApi.createUser(
+          req.body.user,
+          req.body.pass,
+          (err, user) => {
+            if (err) {
+              console.error(err);
+              return next(err);
+            }
+            if (user) {
+              console.log(user);
+              res.status(200).send(user);
+            }
+          },
+          userModel
+        );
+      } else {
+        res.status(404).send("User already exists");
+      }
+    },
+    userModel
+  );
+});
+
 const verifyToken = (req, res, next) => {
   const headerBearer = req.headers["authorization"];
   if (typeof headerBearer !== "undefined") {
@@ -38,19 +71,15 @@ const verifyToken = (req, res, next) => {
 };
 
 router.post("/login", (req, res, next) => {
-  console.log(req.body.user);
   mongoApi.findOne(
     req.body.user,
     (err, user) => {
       if (err) {
-        console.log(err);
         res.status(404).send(err);
       }
       if (user) {
-        console.log(err);
         jwt.sign({ user }, process.env.KEY, (err, token) => {
           if (err) {
-            console.log(err);
             res.status(404).send(err);
           }
           if (token) {
@@ -58,6 +87,7 @@ router.post("/login", (req, res, next) => {
           }
         });
       }
+      res.status(500);
     },
     userModel
   );
@@ -101,6 +131,16 @@ router.get("/login/token", verifyToken, (req, res) => {
       res.status(403).send("Unauthenticated");
     } else {
       res.json({ message: "verified", token });
+    }
+  });
+});
+
+router.get("/signup", (req, res) => {
+  res.sendFile(__dirname + "/index.html", (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log("Sent successfully");
     }
   });
 });
